@@ -1,19 +1,8 @@
 #include "MainWindow.h"
 
-#ifdef _WIN32
-#define DEFAULT_COMPILER_PATH "C:/FPC/3.0.0/bin/i386-win32/ppcrossx64.exe"
-#elif __APPLE__
-#define DEFAULT_COMPILER_PATH "/usr/local/bin/fpc"
-#else
-#define DEFAULT_COMPILER_PATH "/usr/bin/fpc"
-#endif
-
 MainWindow::MainWindow()
 {
-    setWindowTitle("IDE4Pascal");
-    _compilerPath = DEFAULT_COMPILER_PATH;
-    _compilerProcess = new QProcess;
-
+    setWindowTitle("HybridEditor");
     createUI();
 }
 
@@ -84,20 +73,6 @@ void MainWindow::createUI()
     QAction* changeFontAction = formatMenu->addAction("&Change font");
     changeFontAction->setIcon(QIcon(":/res/preferences-desktop-font.png"));
 
-    // Build menu
-    QMenu* menuCompiler = menuBar()->addMenu("&Build");
-
-    QAction* actionCompiler = menuCompiler->addAction("&Build file");
-    actionCompiler->setShortcut(QKeySequence("Ctrl+F9"));
-    actionCompiler->setIcon(QIcon(":/res/applications-system.png"));
-
-    QAction* runExecutableAction = menuCompiler->addAction("&Run");
-    runExecutableAction->setShortcut(QKeySequence("Ctrl+F10"));
-    runExecutableAction->setIcon(QIcon(":/res/media-playback-start.png"));
-
-    QAction* setCompilerAction = menuCompiler->addAction("&Set compiler path");
-    setCompilerAction->setIcon(QIcon(":/res/preferences-system.png"));
-
     // About menu
     QMenu* helpMenu = menuBar()->addMenu("&About");
 
@@ -119,12 +94,6 @@ void MainWindow::createUI()
     editToolbar->addAction(_cutAction);
     editToolbar->addAction(_pasteAction);
 
-    // Build toolbar
-    QToolBar* buildToolbar = addToolBar("Build");
-    buildToolbar->addAction(actionCompiler);
-    buildToolbar->addAction(runExecutableAction);
-    buildToolbar->addAction(setCompilerAction);
-
     // Statusbar
     QStatusBar* statusbar = statusBar();
     statusbar->showMessage("Ready");
@@ -132,43 +101,13 @@ void MainWindow::createUI()
     // Central Widget
     createTabUi();
 
-    // Dock
-    QDockWidget* dock = new QDockWidget("Build output", this);
-    addDockWidget(Qt::BottomDockWidgetArea, dock);
-
-    QWidget* dockContent = new QWidget;
-    dock->setWidget(dockContent);
-
-    _buildOutput = new QTextEdit(this);
-    _buildOutput->setReadOnly(true);
-#ifdef __APPLE__
-    int outputFontSize = 12;
-    QString outputFontFamily = "Menlo";
-#elif _WIN32
-    int outputFontSize = 11;
-    QString outputFontFamily = "Consolas";
-#else
-    int outputFontSize = 10;
-    QString outputFontFamily = "Courier New";
-#endif
-    _buildOutput->setFont(QFont(outputFontFamily, outputFontSize, QFont::Bold, false));
-
-    QVBoxLayout* dockLayout = new QVBoxLayout;
-    dockLayout->setSpacing(0);
-    dockLayout->addWidget(_buildOutput);
-
-    dockContent->setLayout(dockLayout);
-
     // Actions
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(newAction, SIGNAL(triggered()), this, SLOT(newFile()));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
-    connect(actionCompiler, SIGNAL(triggered()), this, SLOT(build()));
-    connect(runExecutableAction, SIGNAL(triggered()), this, SLOT(runExecutable()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
-    connect(setCompilerAction, SIGNAL(triggered()), this, SLOT(setCompilerPath()));
     connect(_undoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_redoAction, SIGNAL(triggered()), this, SLOT(redo()));
     connect(_copyAction, SIGNAL(triggered()), this, SLOT(copy()));
@@ -246,7 +185,7 @@ void MainWindow::redo()
 QString MainWindow::newTabName()
 {
     static int sequenceNumber = 1;
-    return tr("file%1.pas").arg(sequenceNumber++);
+    return tr("Untitled%1.txt").arg(sequenceNumber++);
 }
 
 void MainWindow::newFile()
@@ -269,11 +208,9 @@ Editor* MainWindow::createTab(const QString& name)
 
 void MainWindow::open()
 {
-    QString fileName = QFileDialog::getOpenFileName(this);
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::homePath());
     if (!fileName.isEmpty()) {
-        _filepath = fileName;
-
-        Editor* child = createTab(QFileInfo(_filepath).fileName());
+        Editor* child = createTab(QFileInfo(fileName).fileName());
         if (child->loadFile(fileName)) {
             statusBar()->showMessage(tr("File loaded"), 2000);
             child->show();
@@ -304,16 +241,7 @@ void MainWindow::saveAs()
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, "About", "IDE4Pascal v0.0.1");
-}
-
-void MainWindow::setCompilerPath()
-{
-    bool ok = false;
-    QString res = QInputDialog::getText(this, "Set compiler path", "Current path: " + _compilerPath,
-        QLineEdit::Normal, QString(), &ok);
-    if (ok && !res.isEmpty())
-        _compilerPath = res;
+    QMessageBox::about(this, "About", "HybridEditor v0.0.1");
 }
 
 void MainWindow::changeFont()
@@ -323,97 +251,6 @@ void MainWindow::changeFont()
         QFont cEditFont = QFontDialog::getFont(&ok, activeTab()->font(), this, "Change font");
         if (ok) {
             activeTab()->setFont(cEditFont);
-        }
-    }
-}
-
-bool MainWindow::build()
-{
-    if (!activeTab())
-        return false;
-
-    _buildOutput->clear();
-
-    if (activeTab() && activeTab()->save())
-        statusBar()->showMessage(tr("File saved"), 2000);
-
-    _filepath = activeTab()->filePath();
-    _filename = QFileInfo(_filepath).fileName();
-    _workingDir = QFileInfo(_filepath).dir().absolutePath();
-
-    QString buildLogFilepath = _workingDir + QDir::separator() + "BUILDLOG.TXT";
-
-    _compilerProcess->setWorkingDirectory(_workingDir);
-    _compilerProcess->setStandardOutputFile(buildLogFilepath);
-    _compilerProcess->setProcessChannelMode(QProcess::MergedChannels);
-    _compilerProcess->start(_compilerPath, QStringList() << _filepath);
-    _compilerProcess->waitForFinished();
-
-    QString errorStr = _compilerProcess->errorString();
-    if (errorStr.length() > 0) {
-        QFile buildLogFile(buildLogFilepath);
-        if (buildLogFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            while (!buildLogFile.atEnd()) {
-                QString line = buildLogFile.readLine();
-                _buildOutput->append(line);
-            }
-        }
-    }
-
-    int exitCode = _compilerProcess->exitCode();
-    if (exitCode == 0) {
-        statusBar()->showMessage(tr("Build succeeded"), 2000);
-        return true;
-    }
-    else if (exitCode == 1) {
-        statusBar()->showMessage(tr("Build failed"), 2000);
-        return false;
-    }
-
-    return false;
-}
-
-QString MainWindow::exeFilePath()
-{
-#ifdef _WIN32
-    QString exe = _workingDir + QDir::separator() + QFileInfo(_filepath).baseName() + ".exe";
-    exe.replace("\\", "/");
-#else
-    QString exe = _workingDir + QDir::separator() + QFileInfo(_filepath).baseName();
-#endif
-
-    return exe;
-}
-
-void MainWindow::platformSpecificRunExe(QString exe)
-{
-#ifdef __APPLE__
-    QProcess proc;
-    proc.startDetached("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
-        QStringList() << exe);
-#elif _WIN32
-    QProcess proc;
-    proc.startDetached(exe);
-#else
-    QProcess proc;
-    proc.startDetached("xterm", QStringList() << "-e"
-                                              << "sh"
-                                              << "-c" << exe);
-#endif
-}
-
-void MainWindow::runExecutable()
-{
-    if (!activeTab())
-        return;
-
-    QString exe = exeFilePath();
-    QFile exeFile(exe);
-
-    // TODO: We need to build only when there are changes
-    if (build()) {
-        if (exeFile.exists()) {
-            platformSpecificRunExe(exe);
         }
     }
 }

@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = IDE4Pascal
+TARGET = HybridEditor
 DEPENDPATH += .
 INCLUDEPATH += .
 
@@ -15,7 +15,7 @@ SOURCES += MainWindow.cpp main.cpp \
     Editor.cpp \
     Document.cpp
 RC_FILE = res.rc
-ICON = IDE4Pascal.icns
+ICON = HybridEditor.icns
 
 RESOURCES += \
     res.qrc
