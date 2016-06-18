@@ -2,8 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets>
-#include <QProcess>
 #include <QTabWidget>
+#include <QTreeView>
+#include <QFileSystemModel>
 #include <Editor.h>
 
 class MainWindow : public QMainWindow {
@@ -13,13 +14,26 @@ public:
     MainWindow();
 
 private:
+    void createUI();
+    void createMenu();
+    void createToolbar();
     void createTabUi();
+    void openFileExplorer(const QString& path);
     Editor* activeTab();
     Editor* createTab(const QString& name = "");
-    void createUI();
-    QString newTabName();
+    static QString newTabName();
+    void setOpenedFolderPath(const QString& path);
+    const QString& openedFolderPath() const;
 
 private:
+    QAction* _newAction;
+    QAction* _openFileAction;
+    QAction* _openDirectoryAction;
+    QAction* _saveAction;
+    QAction* _saveAsAction;
+    QAction* _quitAction;
+    QAction* _changeFontAction;
+    QAction* _aboutAction;
     QAction* _copyAction;
     QAction* _pasteAction;
     QAction* _cutAction;
@@ -27,6 +41,10 @@ private:
     QAction* _undoAction;
     QAction* _redoAction;
     QTabWidget* _tabWidget;
+    QDockWidget* _fileExplorerDockWidget;
+    QFileSystemModel* _fileSystemModel;
+    QTreeView* _treeView;
+    QString _openedFolderPath;
 
 public slots:
     void newFile();
@@ -38,7 +56,9 @@ public slots:
     void copy();
     void paste();
     void cut();
-    void open();
+    void openFile();
+    void openFile(const QModelIndex &index);
+    void openDirectory();
     void save();
     void saveAs();
     void closeTab(int);

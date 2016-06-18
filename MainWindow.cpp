@@ -8,37 +8,82 @@ MainWindow::MainWindow()
 
 void MainWindow::createUI()
 {
-    // File menu
+    createMenu();
+    createToolbar();
+    createTabUi();
+
+    // Statusbar
+    QStatusBar* statusbar = statusBar();
+    statusbar->showMessage("Ready");
+}
+
+void MainWindow::openFileExplorer(const QString& path)
+{
+    setOpenedFolderPath(path);
+
+    if (_fileSystemModel == nullptr || _treeView == nullptr) {
+        _fileExplorerDockWidget = new QDockWidget(QFileInfo(path).fileName(), this);
+        addDockWidget(Qt::LeftDockWidgetArea, _fileExplorerDockWidget);
+
+        _fileSystemModel = new QFileSystemModel;
+        _fileSystemModel->setRootPath(path);
+
+        _treeView = new QTreeView(_fileExplorerDockWidget);
+        _treeView->setModel(_fileSystemModel);
+        _treeView->setRootIndex(_fileSystemModel->index(path));
+        _treeView->setColumnHidden(1, true);
+        _treeView->setColumnHidden(2, true);
+        _treeView->setColumnHidden(3, true);
+        _treeView->setHeaderHidden(true);
+        connect(_treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openFile(QModelIndex)));
+
+        _fileExplorerDockWidget->setWidget(_treeView);
+    }
+    else {
+        _fileExplorerDockWidget->setWindowTitle(QFileInfo(path).fileName());
+        _fileSystemModel->setRootPath(path);
+        _treeView->setRootIndex(_fileSystemModel->index(path));
+    }
+}
+
+void MainWindow::createMenu()
+{
+    // File
     QMenu* fileMenu = menuBar()->addMenu("&File");
 
-    QAction* newAction = fileMenu->addAction("&New");
-    newAction->setShortcut(QKeySequence("Ctrl+N"));
-    newAction->setIcon(QIcon(":/res/document-new.png"));
-    newAction->setStatusTip("Create new file");
+    _newAction = fileMenu->addAction("&New");
+    _newAction->setShortcut(QKeySequence("Ctrl+N"));
+    _newAction->setIcon(QIcon(":/res/document-new.png"));
+    _newAction->setStatusTip("Create new file");
 
-    QAction* openAction = fileMenu->addAction("&Open");
-    openAction->setShortcut(QKeySequence("Ctrl+O"));
-    openAction->setIcon(QIcon(":/res/document-open.png"));
-    openAction->setStatusTip("Open file");
+    _openFileAction = fileMenu->addAction("&Open file");
+    _openFileAction->setShortcut(QKeySequence("Ctrl+O"));
+    _openFileAction->setIcon(QIcon(":/res/document-open.png"));
+    _openFileAction->setStatusTip("Open file");
 
-    QAction* saveAction = fileMenu->addAction("&Save");
-    saveAction->setShortcut(QKeySequence("Ctrl+S"));
-    saveAction->setIcon(QIcon(":/res/document-save.png"));
-    saveAction->setStatusTip("Save file");
+    _openDirectoryAction = fileMenu->addAction("&Open directory");
+    _openDirectoryAction->setShortcut(QKeySequence("Ctrl+O"));
+    _openDirectoryAction->setIcon(QIcon(":/res/folder.png"));
+    _openDirectoryAction->setStatusTip("Open directory");
 
-    QAction* saveAsAction = fileMenu->addAction("&Save As...");
-    saveAsAction->setShortcut(QKeySequence("Ctrl+Alt+S"));
-    saveAsAction->setIcon(QIcon(":/res/document-save-as.png"));
-    saveAsAction->setStatusTip("Save file as...");
+    _saveAction = fileMenu->addAction("&Save");
+    _saveAction->setShortcut(QKeySequence("Ctrl+S"));
+    _saveAction->setIcon(QIcon(":/res/document-save.png"));
+    _saveAction->setStatusTip("Save file");
+
+    _saveAsAction = fileMenu->addAction("&Save As...");
+    _saveAsAction->setShortcut(QKeySequence("Ctrl+Alt+S"));
+    _saveAsAction->setIcon(QIcon(":/res/document-save-as.png"));
+    _saveAsAction->setStatusTip("Save file as...");
 
     fileMenu->addSeparator();
 
-    QAction* quitAction = fileMenu->addAction("&Quit");
-    quitAction->setShortcut(QKeySequence("Alt+F4"));
-    quitAction->setIcon(QIcon(":/res/system-log-out.png"));
-    quitAction->setStatusTip("Quit application");
+    _quitAction = fileMenu->addAction("&Quit");
+    _quitAction->setShortcut(QKeySequence("Alt+F4"));
+    _quitAction->setIcon(QIcon(":/res/system-log-out.png"));
+    _quitAction->setStatusTip("Quit application");
 
-    // Edit menu
+    // Edit
     QMenu* editMenu = menuBar()->addMenu("&Edit");
 
     _undoAction = editMenu->addAction("&Undo");
@@ -67,54 +112,52 @@ void MainWindow::createUI()
     _selectAllAction->setShortcut(QKeySequence("Ctrl+A"));
     _selectAllAction->setIcon(QIcon(":/res/edit-select-all.png"));
 
-    // Format menu
+    // Format
     QMenu* formatMenu = menuBar()->addMenu("&Format");
 
-    QAction* changeFontAction = formatMenu->addAction("&Change font");
-    changeFontAction->setIcon(QIcon(":/res/preferences-desktop-font.png"));
+    _changeFontAction = formatMenu->addAction("&Change font");
+    _changeFontAction->setIcon(QIcon(":/res/preferences-desktop-font.png"));
 
-    // About menu
+    // About
     QMenu* helpMenu = menuBar()->addMenu("&About");
 
-    QAction* aboutAction = helpMenu->addAction("&About");
-    aboutAction->setIcon(QIcon(":/res/help-browser.png"));
+    _aboutAction = helpMenu->addAction("&About");
+    _aboutAction->setIcon(QIcon(":/res/help-browser.png"));
 
-    // File toolbar
-    QToolBar* fileToolbar = addToolBar("File");
-    fileToolbar->addAction(newAction);
-    fileToolbar->addAction(openAction);
-    fileToolbar->addAction(saveAction);
-    fileToolbar->addAction(saveAsAction);
-
-    // Edit toolbar
-    QToolBar* editToolbar = addToolBar("Edit");
-    editToolbar->addAction(_undoAction);
-    editToolbar->addAction(_redoAction);
-    editToolbar->addAction(_copyAction);
-    editToolbar->addAction(_cutAction);
-    editToolbar->addAction(_pasteAction);
-
-    // Statusbar
-    QStatusBar* statusbar = statusBar();
-    statusbar->showMessage("Ready");
-
-    // Central Widget
-    createTabUi();
-
-    // Actions
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-    connect(newAction, SIGNAL(triggered()), this, SLOT(newFile()));
-    connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
-    connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
-    connect(saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
-    connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+    // Connect actions
+    connect(_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+    connect(_openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
+    connect(_openDirectoryAction, SIGNAL(triggered()), this, SLOT(openDirectory()));
+    connect(_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+    connect(_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+    connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
     connect(_undoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_redoAction, SIGNAL(triggered()), this, SLOT(redo()));
     connect(_copyAction, SIGNAL(triggered()), this, SLOT(copy()));
     connect(_pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
     connect(_cutAction, SIGNAL(triggered()), this, SLOT(cut()));
     connect(_selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
-    connect(changeFontAction, SIGNAL(triggered()), this, SLOT(changeFont()));
+    connect(_changeFontAction, SIGNAL(triggered()), this, SLOT(changeFont()));
+}
+
+void MainWindow::createToolbar()
+{
+    // File
+    QToolBar* fileToolbar = addToolBar("File");
+    fileToolbar->addAction(_newAction);
+    fileToolbar->addAction(_openFileAction);
+    fileToolbar->addAction(_openDirectoryAction);
+    fileToolbar->addAction(_saveAction);
+    fileToolbar->addAction(_saveAsAction);
+
+    // Edit
+    QToolBar* editToolbar = addToolBar("Edit");
+    editToolbar->addAction(_undoAction);
+    editToolbar->addAction(_redoAction);
+    editToolbar->addAction(_copyAction);
+    editToolbar->addAction(_cutAction);
+    editToolbar->addAction(_pasteAction);
 }
 
 void MainWindow::createTabUi()
@@ -133,6 +176,71 @@ void MainWindow::closeTab(int index)
 {
     _tabWidget->removeTab(index);
 }
+
+QString MainWindow::newTabName()
+{
+    static int sequenceNumber = 1;
+    return tr("Untitled%1.txt").arg(sequenceNumber++);
+}
+
+Editor* MainWindow::createTab(const QString& path)
+{
+    if (path.isEmpty()) {
+        // New empty tab
+        Editor* editor = new Editor;
+        QString tabTitle = MainWindow::newTabName();
+        editor->setGeneratedFilename(tabTitle);
+        int index = _tabWidget->addTab(editor, tabTitle);
+        _tabWidget->setCurrentIndex(index);
+        editor->show();
+    }
+    else {
+        // If the file is already open, we activate its tab
+        for (int i = 0; i < _tabWidget->count(); i++) {
+            Editor* e = (Editor*)_tabWidget->widget(i);
+            if (e && e->filePath() == path) {
+                _tabWidget->setCurrentIndex(i);
+                return e;
+            }
+        }
+
+        Editor* editor = new Editor;
+        QString tabTitle = QFileInfo(path).fileName();
+        editor->setGeneratedFilename(tabTitle);
+        if (editor->loadFile(path)) {
+            int index = _tabWidget->addTab(editor, tabTitle);
+            _tabWidget->setCurrentIndex(index);
+            editor->show();
+            statusBar()->showMessage(tr("File loaded"), 2000);
+            return editor;
+        }
+        else {
+            delete editor;
+            return nullptr;
+        }
+    }
+
+    return nullptr;
+}
+
+Editor* MainWindow::activeTab()
+{
+    return (Editor*)_tabWidget->currentWidget();
+}
+
+void MainWindow::setOpenedFolderPath(const QString& path)
+{
+    if (path != _openedFolderPath) {
+        _openedFolderPath = path;
+    }
+}
+
+const QString& MainWindow::openedFolderPath() const
+{
+    return _openedFolderPath;
+}
+
+// --- Slots ---
 
 void MainWindow::cut()
 {
@@ -182,48 +290,45 @@ void MainWindow::redo()
     }
 }
 
-QString MainWindow::newTabName()
-{
-    static int sequenceNumber = 1;
-    return tr("Untitled%1.txt").arg(sequenceNumber++);
-}
-
 void MainWindow::newFile()
 {
     createTab();
 }
 
-Editor* MainWindow::createTab(const QString& name)
+void MainWindow::openFile()
 {
-    QString tabTitle = name.length() == 0 ? newTabName() : name;
-
-    Editor* child = new Editor;
-    child->setGeneratedFilename(tabTitle);
-
-    int index = _tabWidget->addTab(child, tabTitle);
-    _tabWidget->setCurrentIndex(index);
-
-    return child;
-}
-
-void MainWindow::open()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::homePath());
-    if (!fileName.isEmpty()) {
-        Editor* child = createTab(QFileInfo(fileName).fileName());
-        if (child->loadFile(fileName)) {
-            statusBar()->showMessage(tr("File loaded"), 2000);
-            child->show();
-        }
-        else {
-            child->close();
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setDirectory(QDir::homePath());
+    dialog.setWindowTitle(tr("Open File"));
+    if (dialog.exec() && dialog.selectedFiles().count() > 0) {
+        QString path = dialog.selectedFiles().at(0);
+        if (QFileInfo(path).isFile()) {
+            createTab(path);
         }
     }
 }
 
-Editor* MainWindow::activeTab()
+void MainWindow::openFile(const QModelIndex &index)
 {
-    return (Editor*)_tabWidget->currentWidget();
+    QString path = _fileSystemModel->filePath(index);
+    if (QFileInfo(path).isFile()) {
+        createTab(path);
+    }
+}
+
+void MainWindow::openDirectory()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setDirectory(QDir::homePath());
+    dialog.setWindowTitle(tr("Open File"));
+    if (dialog.exec() && dialog.selectedFiles().count() > 0) {
+        QString path = dialog.selectedFiles().at(0);
+        if (QFileInfo(path).isDir()) {
+            openFileExplorer(path);
+        }
+    }
 }
 
 void MainWindow::save()
@@ -248,9 +353,9 @@ void MainWindow::changeFont()
 {
     bool ok = false;
     if (activeTab()) {
-        QFont cEditFont = QFontDialog::getFont(&ok, activeTab()->font(), this, "Change font");
+        QFont font = QFontDialog::getFont(&ok, activeTab()->font(), this, "Change font");
         if (ok) {
-            activeTab()->setFont(cEditFont);
+            activeTab()->setFont(font);
         }
     }
 }

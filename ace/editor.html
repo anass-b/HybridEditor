@@ -27,6 +27,8 @@
       var editor = ace.edit("editor");
       editor.setTheme("ace/theme/twilight");
       editor.getSession().setMode("ace/mode/pascal");
+      //document.getElementById('editor').style.fontFamily='Courier';
+      //document.getElementById('editor').style.fontSize='13px';
 
       var updateText = function(text) {
           editor.setValue(text);

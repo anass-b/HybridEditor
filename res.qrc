@@ -355,5 +355,6 @@
         <file>ace/ace/worker-xquery.js</file>
         <file>ace/editor.html</file>
         <file>ace/qwebchannel.js</file>
+        <file>res/folder.png</file>
     </qresource>
 </RCC>
