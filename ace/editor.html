@@ -32,7 +32,9 @@
 
       var updateText = function(text, lang) {
         editor.getSession().setMode("ace/mode/" + lang);
-        editor.setValue(text);
+        editor.setValue("");
+        editor.insert(text);
+        editor.gotoLine(0);
       }
 
       new QWebChannel(qt.webChannelTransport,
