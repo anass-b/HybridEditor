@@ -1,4 +1,9 @@
 #include "MainWindow.h"
+#include <iostream>
+#include <QFile>
+#include <QJsonDocument>
+#include <QMap>
+#include <QList>
 
 MainWindow::MainWindow()
 {
@@ -6,10 +11,60 @@ MainWindow::MainWindow()
     createUI();
 }
 
+const QMap<QString, QList<QString>>& MainWindow::extLangMap()
+{
+    static QMap<QString, QList<QString>> extLangMap;
+    static bool loaded = false;
+
+    if (!loaded) {
+        QFile file(":/extlangmap.json");
+        file.open(QIODevice::ReadOnly);
+        QString json = file.readAll();
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(json.toUtf8());
+        QJsonArray mapArr = jsonDoc.object()["map"].toArray();
+        for (int i = 0; i < mapArr.count(); i++) {
+            QString lang = mapArr.at(i).toObject()["id"].toString();
+            QList<QString> extensions;
+            QJsonArray extArr = mapArr.at(i).toObject()["ext"].toArray();
+            for (int j = 0; j < extArr.count(); j++) {
+                extensions.append(extArr.at(j).toString());
+            }
+            extLangMap[lang] = extensions;
+        }
+        loaded = true;
+
+        for (int i = 0; i < extLangMap.keys().count(); i++) {
+            QString key = extLangMap.keys().at(i);
+            std::cout << key.toStdString() << ": ";
+            QList<QString> extensions = extLangMap[key];
+            for (int j = 0; j < extensions.count(); j++) {
+                std::cout << extensions.at(j).toStdString() << ",";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    return extLangMap;
+}
+
+QString MainWindow::lang(const QMap<QString, QList<QString>>& map, const QString& ext)
+{
+    for (int i = 0; i < map.keys().count(); i++) {
+        QString key = map.keys().at(i);
+        QList<QString> extensions = map[key];
+        for (int j = 0; j < extensions.count(); j++) {
+            if (extensions.at(j) == ext) {
+                return key;
+            }
+        }
+    }
+    return "";
+}
+
 void MainWindow::createUI()
 {
     createMenu();
-    createToolbar();
+    //createToolbar();
     createTabUi();
 
     // Statusbar
@@ -53,34 +108,28 @@ void MainWindow::createMenu()
 
     _newAction = fileMenu->addAction("&New");
     _newAction->setShortcut(QKeySequence("Ctrl+N"));
-    _newAction->setIcon(QIcon(":/res/document-new.png"));
     _newAction->setStatusTip("Create new file");
 
     _openFileAction = fileMenu->addAction("&Open file");
     _openFileAction->setShortcut(QKeySequence("Ctrl+O"));
-    _openFileAction->setIcon(QIcon(":/res/document-open.png"));
     _openFileAction->setStatusTip("Open file");
 
     _openDirectoryAction = fileMenu->addAction("&Open directory");
-    _openDirectoryAction->setShortcut(QKeySequence("Ctrl+O"));
-    _openDirectoryAction->setIcon(QIcon(":/res/folder.png"));
+    _openDirectoryAction->setShortcut(QKeySequence("Ctrl+Alt+O"));
     _openDirectoryAction->setStatusTip("Open directory");
 
     _saveAction = fileMenu->addAction("&Save");
     _saveAction->setShortcut(QKeySequence("Ctrl+S"));
-    _saveAction->setIcon(QIcon(":/res/document-save.png"));
     _saveAction->setStatusTip("Save file");
 
     _saveAsAction = fileMenu->addAction("&Save As...");
     _saveAsAction->setShortcut(QKeySequence("Ctrl+Alt+S"));
-    _saveAsAction->setIcon(QIcon(":/res/document-save-as.png"));
     _saveAsAction->setStatusTip("Save file as...");
 
     fileMenu->addSeparator();
 
     _quitAction = fileMenu->addAction("&Quit");
     _quitAction->setShortcut(QKeySequence("Alt+F4"));
-    _quitAction->setIcon(QIcon(":/res/system-log-out.png"));
     _quitAction->setStatusTip("Quit application");
 
     // Edit
@@ -88,41 +137,33 @@ void MainWindow::createMenu()
 
     _undoAction = editMenu->addAction("&Undo");
     _undoAction->setShortcut(QKeySequence("Ctrl+Z"));
-    _undoAction->setIcon(QIcon(":/res/edit-undo.png"));
 
     _redoAction = editMenu->addAction("&Redo");
     _redoAction->setShortcut(QKeySequence("Ctrl+Y"));
-    _redoAction->setIcon(QIcon(":/res/edit-redo.png"));
 
     editMenu->addSeparator();
 
     _copyAction = editMenu->addAction("&Copy");
     _copyAction->setShortcut(QKeySequence("Ctrl+C"));
-    _copyAction->setIcon(QIcon(":/res/edit-copy.png"));
 
     _cutAction = editMenu->addAction("&Cut");
     _cutAction->setShortcut(QKeySequence("Ctrl+X"));
-    _cutAction->setIcon(QIcon(":/res/edit-cut.png"));
 
     _pasteAction = editMenu->addAction("&Paste");
     _pasteAction->setShortcut(QKeySequence("Ctrl+V"));
-    _pasteAction->setIcon(QIcon(":/res/edit-paste.png"));
 
     _selectAllAction = editMenu->addAction("&Select All");
     _selectAllAction->setShortcut(QKeySequence("Ctrl+A"));
-    _selectAllAction->setIcon(QIcon(":/res/edit-select-all.png"));
 
     // Format
     QMenu* formatMenu = menuBar()->addMenu("&Format");
 
     _changeFontAction = formatMenu->addAction("&Change font");
-    _changeFontAction->setIcon(QIcon(":/res/preferences-desktop-font.png"));
 
     // About
     QMenu* helpMenu = menuBar()->addMenu("&About");
 
     _aboutAction = helpMenu->addAction("&About");
-    _aboutAction->setIcon(QIcon(":/res/help-browser.png"));
 
     // Connect actions
     connect(_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -170,6 +211,8 @@ void MainWindow::createTabUi()
     connect(_tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 
     setCentralWidget(_tabWidget);
+
+    createTab();
 }
 
 void MainWindow::closeTab(int index)
@@ -195,6 +238,9 @@ Editor* MainWindow::createTab(const QString& path)
         editor->show();
     }
     else {
+        QFileInfo fileInfo(path);
+        if (!fileInfo.isFile()) return nullptr;
+
         // If the file is already open, we activate its tab
         for (int i = 0; i < _tabWidget->count(); i++) {
             Editor* e = (Editor*)_tabWidget->widget(i);
@@ -205,7 +251,7 @@ Editor* MainWindow::createTab(const QString& path)
         }
 
         Editor* editor = new Editor;
-        QString tabTitle = QFileInfo(path).fileName();
+        QString tabTitle = fileInfo.fileName();
         editor->setGeneratedFilename(tabTitle);
         if (editor->loadFile(path)) {
             int index = _tabWidget->addTab(editor, tabTitle);

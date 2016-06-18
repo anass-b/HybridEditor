@@ -26,22 +26,23 @@
   <script>
       var editor = ace.edit("editor");
       editor.setTheme("ace/theme/twilight");
-      editor.getSession().setMode("ace/mode/pascal");
+      
       //document.getElementById('editor').style.fontFamily='Courier';
       //document.getElementById('editor').style.fontSize='13px';
 
-      var updateText = function(text) {
-          editor.setValue(text);
+      var updateText = function(text, lang) {
+        editor.getSession().setMode("ace/mode/" + lang);
+        editor.setValue(text);
       }
 
       new QWebChannel(qt.webChannelTransport,
         function(channel) {
           var content = channel.objects.content;
-          updateText(content.text);
-          content.textChanged.connect(updateText);
+          updateText(content.text, content.lang);
+          //content.textChanged.connect(updateText);
 
           editor.getSession().on('change', function() {
-              content.remoteText = editor.getValue();
+              content.text = editor.getValue();
           });
         }
       );

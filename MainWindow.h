@@ -12,6 +12,8 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow();
+    static const QMap<QString, QList<QString>>& extLangMap();
+    static QString lang(const QMap<QString, QList<QString>>& map, const QString& ext);
 
 private:
     void createUI();
@@ -63,5 +65,7 @@ public slots:
     void saveAs();
     void closeTab(int);
 };
+
+//QMap<QString, QList<QString>> MainWindow::_extLangMap;
 
 #endif

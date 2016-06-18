@@ -1,0 +1,52 @@
+{
+    "map": [
+        {
+            "id": "c_cpp",
+            "ext":  ["c", "cpp", "cc", "cp", "c++", "h", "hpp", "cxx", "hxx"]
+        },
+        {
+            "id": "objectivec",
+            "ext": ["m", "mm"]
+        },
+        {
+            "id": "java",
+            "ext": ["java"]
+        },
+        {
+            "id": "jsp",
+            "ext": ["jsp"]
+        },
+        {
+            "id": "jsx",
+            "ext": ["jsx"]
+        },
+        {
+            "id": "ruby",
+            "ext": ["rb"]
+        },
+        {
+            "id": "html_ruby",
+            "ext": ["erb"]
+        },
+        {
+            "id": "css",
+            "ext": ["css"]
+        },
+        {
+            "id": "less",
+            "ext": ["less"]
+        },
+        {
+            "id": "sass",
+            "ext": ["sass"]
+        },
+        {
+            "id": "html",
+            "ext": ["html", "htm"]
+        },
+        {
+            "id": "javascript",
+            "ext": ["js"]
+        }
+    ]
+}

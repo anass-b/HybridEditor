@@ -19,3 +19,6 @@ ICON = HybridEditor.icns
 
 RESOURCES += \
     res.qrc
+
+DISTFILES += \
+    extlangmap.json

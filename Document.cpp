@@ -2,21 +2,22 @@
 
 void Document::setText(const QString& text)
 {
-    if (text == _text)
-        return;
+    if (text == _text) return;
     _text = text;
-    _remoteText = _text;
-    emit textChanged(_text);
 }
 
-void Document::setRemoteText(const QString& remoteText)
+const QString& Document::text() const
 {
-    if (remoteText == _remoteText)
-        return;
-    _remoteText = remoteText;
+    return _text;
 }
 
-const QString& Document::getRemoteText() const
+void Document::setLang(const QString& lang)
 {
-    return _remoteText;
+    if (_lang == lang) return;
+    _lang = lang;
+}
+
+const QString& Document::lang() const
+{
+    return _lang;
 }

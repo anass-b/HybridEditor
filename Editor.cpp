@@ -1,5 +1,5 @@
-#include <QtWidgets>
 #include "Editor.h"
+#include "MainWindow.h"
 #include <QWebChannel>
 
 Editor::Editor()
@@ -40,6 +40,7 @@ bool Editor::loadFile(const QString& filePath)
 
     QTextStream in(&file);
     _content.setText(in.readAll());
+    _content.setLang(MainWindow::lang(MainWindow::extLangMap(), QFileInfo(filePath).suffix()));
 
     return true;
 }
@@ -67,7 +68,7 @@ bool Editor::saveAs()
 
 bool Editor::saveFile(const QString& filePath)
 {
-    QString text = _content.getRemoteText();
+    QString text = _content.text();
 
     QFile file(filePath);
 

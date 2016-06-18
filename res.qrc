@@ -1,22 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/applications-system.png</file>
-        <file>res/document-new.png</file>
-        <file>res/document-open.png</file>
-        <file>res/document-save.png</file>
-        <file>res/document-save-as.png</file>
-        <file>res/edit-copy.png</file>
-        <file>res/edit-cut.png</file>
-        <file>res/edit-paste.png</file>
-        <file>res/edit-redo.png</file>
-        <file>res/edit-select-all.png</file>
-        <file>res/edit-undo.png</file>
-        <file>res/help-browser.png</file>
-        <file>res/media-playback-start.png</file>
-        <file>res/preferences-desktop-font.png</file>
-        <file>res/preferences-system.png</file>
-        <file>res/system-log-out.png</file>
-        <file>res/view-refresh.png</file>
         <file>ace/ace/snippets/abap.js</file>
         <file>ace/ace/snippets/abc.js</file>
         <file>ace/ace/snippets/actionscript.js</file>
@@ -355,6 +338,6 @@
         <file>ace/ace/worker-xquery.js</file>
         <file>ace/editor.html</file>
         <file>ace/qwebchannel.js</file>
-        <file>res/folder.png</file>
+        <file>extlangmap.json</file>
     </qresource>
 </RCC>
