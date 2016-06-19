@@ -5,6 +5,7 @@
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include "Document.h"
+#include "Languages.h"
 
 class Editor : public QWebEngineView {
     Q_OBJECT
@@ -17,6 +18,7 @@ public:
     bool saveAs();
     const QString& filePath() const;
     void setGeneratedFilename(const QString& generatedFilename);
+    static Languages& languages();
 
 public slots:
     void copy();

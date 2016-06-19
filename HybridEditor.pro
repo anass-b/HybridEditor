@@ -10,10 +10,12 @@ INCLUDEPATH += .
 QT += widgets webenginewidgets webchannel
 HEADERS += MainWindow.h  \
     Editor.h \
-    Document.h
+    Document.h \
+    Languages.h
 SOURCES += MainWindow.cpp main.cpp \
     Editor.cpp \
-    Document.cpp
+    Document.cpp \
+    Languages.cpp
 RC_FILE = res.rc
 ICON = HybridEditor.icns
 
@@ -21,4 +23,4 @@ RESOURCES += \
     res.qrc
 
 DISTFILES += \
-    extlangmap.json
+    lang.json

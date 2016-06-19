@@ -1,6 +1,7 @@
 #include "Editor.h"
 #include "MainWindow.h"
 #include <QWebChannel>
+#include <Languages.h>
 
 Editor::Editor()
 {
@@ -12,6 +13,12 @@ Editor::Editor()
     page->setWebChannel(channel);
 
     page->load(QUrl("qrc:/ace/editor.html"));
+}
+
+Languages& Editor::languages()
+{
+    static Languages _languages;
+    return _languages;
 }
 
 const QString& Editor::filePath() const
@@ -40,7 +47,7 @@ bool Editor::loadFile(const QString& filePath)
 
     QTextStream in(&file);
     _content.setText(in.readAll());
-    _content.setLang(MainWindow::lang(MainWindow::extLangMap(), QFileInfo(filePath).suffix()));
+    _content.setLang(languages().findId(QFileInfo(filePath).suffix()));
 
     return true;
 }

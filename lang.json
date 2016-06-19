@@ -1,51 +1,63 @@
 {
-    "map": [
+    "lang": [
         {
             "id": "c_cpp",
+            "name": "C/C++",
             "ext":  ["c", "cpp", "cc", "cp", "c++", "h", "hpp", "cxx", "hxx"]
         },
         {
             "id": "objectivec",
+            "name": "Objective-C",
             "ext": ["m", "mm"]
         },
         {
             "id": "java",
+            "name": "Java",
             "ext": ["java"]
         },
         {
             "id": "jsp",
+            "name": "JSP",
             "ext": ["jsp"]
         },
         {
             "id": "jsx",
+            "name": "JSX",
             "ext": ["jsx"]
         },
         {
             "id": "ruby",
+            "name": "Ruby",
             "ext": ["rb"]
         },
         {
             "id": "html_ruby",
+            "name": "HTML+Ruby",
             "ext": ["erb"]
         },
         {
             "id": "css",
+            "name": "CSS",
             "ext": ["css"]
         },
         {
             "id": "less",
+            "name": "LESS",
             "ext": ["less"]
         },
         {
             "id": "sass",
+            "name": "SASS",
             "ext": ["sass"]
         },
         {
             "id": "html",
+            "name": "HTML",
             "ext": ["html", "htm"]
         },
         {
             "id": "javascript",
+            "name": "JavaScript",
             "ext": ["js"]
         }
     ]

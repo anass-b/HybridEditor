@@ -338,6 +338,6 @@
         <file>ace/ace/worker-xquery.js</file>
         <file>ace/editor.html</file>
         <file>ace/qwebchannel.js</file>
-        <file>extlangmap.json</file>
+        <file>lang.json</file>
     </qresource>
 </RCC>

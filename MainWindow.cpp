@@ -1,64 +1,11 @@
 #include "MainWindow.h"
 #include <iostream>
-#include <QFile>
-#include <QJsonDocument>
-#include <QMap>
-#include <QList>
 
 MainWindow::MainWindow()
 {
     setWindowTitle("HybridEditor");
     createUI();
-}
-
-const QMap<QString, QList<QString>>& MainWindow::extLangMap()
-{
-    static QMap<QString, QList<QString>> extLangMap;
-    static bool loaded = false;
-
-    if (!loaded) {
-        QFile file(":/extlangmap.json");
-        file.open(QIODevice::ReadOnly);
-        QString json = file.readAll();
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(json.toUtf8());
-        QJsonArray mapArr = jsonDoc.object()["map"].toArray();
-        for (int i = 0; i < mapArr.count(); i++) {
-            QString lang = mapArr.at(i).toObject()["id"].toString();
-            QList<QString> extensions;
-            QJsonArray extArr = mapArr.at(i).toObject()["ext"].toArray();
-            for (int j = 0; j < extArr.count(); j++) {
-                extensions.append(extArr.at(j).toString());
-            }
-            extLangMap[lang] = extensions;
-        }
-        loaded = true;
-
-        for (int i = 0; i < extLangMap.keys().count(); i++) {
-            QString key = extLangMap.keys().at(i);
-            std::cout << key.toStdString() << ": ";
-            QList<QString> extensions = extLangMap[key];
-            for (int j = 0; j < extensions.count(); j++) {
-                std::cout << extensions.at(j).toStdString() << ",";
-            }
-            std::cout << std::endl;
-        }
-    }
-
-    return extLangMap;
-}
-
-QString MainWindow::lang(const QMap<QString, QList<QString>>& map, const QString& ext)
-{
-    for (int i = 0; i < map.keys().count(); i++) {
-        QString key = map.keys().at(i);
-        QList<QString> extensions = map[key];
-        for (int j = 0; j < extensions.count(); j++) {
-            if (extensions.at(j) == ext) {
-                return key;
-            }
-        }
-    }
-    return "";
+    Editor::languages().load();
 }
 
 void MainWindow::createUI()
