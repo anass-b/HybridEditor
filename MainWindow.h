@@ -32,14 +32,13 @@ private:
     QAction* _saveAction;
     QAction* _saveAsAction;
     QAction* _quitAction;
-    QAction* _changeFontAction;
-    QAction* _aboutAction;
     QAction* _copyAction;
     QAction* _pasteAction;
     QAction* _cutAction;
     QAction* _selectAllAction;
     QAction* _undoAction;
     QAction* _redoAction;
+    QAction* _optionsAction;
     QTabWidget* _tabWidget;
     QDockWidget* _fileExplorerDockWidget;
     QFileSystemModel* _fileSystemModel;

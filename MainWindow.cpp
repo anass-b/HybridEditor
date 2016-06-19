@@ -11,12 +11,11 @@ MainWindow::MainWindow()
 void MainWindow::createUI()
 {
     createMenu();
-    //createToolbar();
     createTabUi();
 
     // Statusbar
     QStatusBar* statusbar = statusBar();
-    statusbar->showMessage("Ready");
+    statusbar->showMessage(tr("Ready"));
 }
 
 void MainWindow::openFileExplorer(const QString& path)
@@ -51,66 +50,60 @@ void MainWindow::openFileExplorer(const QString& path)
 void MainWindow::createMenu()
 {
     // File
-    QMenu* fileMenu = menuBar()->addMenu("&File");
+    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
 
-    _newAction = fileMenu->addAction("&New");
+    _newAction = fileMenu->addAction(tr("&New"));
     _newAction->setShortcut(QKeySequence("Ctrl+N"));
     _newAction->setStatusTip("Create new file");
 
-    _openFileAction = fileMenu->addAction("&Open file");
+    _openFileAction = fileMenu->addAction(tr("&Open file"));
     _openFileAction->setShortcut(QKeySequence("Ctrl+O"));
-    _openFileAction->setStatusTip("Open file");
+    _openFileAction->setStatusTip(tr("Open file"));
 
-    _openDirectoryAction = fileMenu->addAction("&Open directory");
+    _openDirectoryAction = fileMenu->addAction(tr("&Open directory"));
     _openDirectoryAction->setShortcut(QKeySequence("Ctrl+Alt+O"));
-    _openDirectoryAction->setStatusTip("Open directory");
+    _openDirectoryAction->setStatusTip(tr("Open directory"));
 
-    _saveAction = fileMenu->addAction("&Save");
+    _saveAction = fileMenu->addAction(tr("&Save"));
     _saveAction->setShortcut(QKeySequence("Ctrl+S"));
-    _saveAction->setStatusTip("Save file");
+    _saveAction->setStatusTip(tr("Save file"));
 
-    _saveAsAction = fileMenu->addAction("&Save As...");
+    _saveAsAction = fileMenu->addAction(tr("&Save As..."));
     _saveAsAction->setShortcut(QKeySequence("Ctrl+Alt+S"));
-    _saveAsAction->setStatusTip("Save file as...");
+    _saveAsAction->setStatusTip(tr("Save file as..."));
 
     fileMenu->addSeparator();
 
-    _quitAction = fileMenu->addAction("&Quit");
+    _quitAction = fileMenu->addAction(tr("&Quit"));
     _quitAction->setShortcut(QKeySequence("Alt+F4"));
-    _quitAction->setStatusTip("Quit application");
+    _quitAction->setStatusTip(tr("Quit application"));
 
     // Edit
-    QMenu* editMenu = menuBar()->addMenu("&Edit");
+    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
 
-    _undoAction = editMenu->addAction("&Undo");
+    _undoAction = editMenu->addAction(tr("&Undo"));
     _undoAction->setShortcut(QKeySequence("Ctrl+Z"));
 
-    _redoAction = editMenu->addAction("&Redo");
+    _redoAction = editMenu->addAction(tr("&Redo"));
     _redoAction->setShortcut(QKeySequence("Ctrl+Y"));
 
     editMenu->addSeparator();
 
-    _copyAction = editMenu->addAction("&Copy");
+    _copyAction = editMenu->addAction(tr("&Copy"));
     _copyAction->setShortcut(QKeySequence("Ctrl+C"));
 
-    _cutAction = editMenu->addAction("&Cut");
+    _cutAction = editMenu->addAction(tr("&Cut"));
     _cutAction->setShortcut(QKeySequence("Ctrl+X"));
 
-    _pasteAction = editMenu->addAction("&Paste");
+    _pasteAction = editMenu->addAction(tr("&Paste"));
     _pasteAction->setShortcut(QKeySequence("Ctrl+V"));
 
-    _selectAllAction = editMenu->addAction("&Select All");
+    _selectAllAction = editMenu->addAction(tr("&Select All"));
     _selectAllAction->setShortcut(QKeySequence("Ctrl+A"));
 
-    // Format
-    QMenu* formatMenu = menuBar()->addMenu("&Format");
+    editMenu->addSeparator();
 
-    _changeFontAction = formatMenu->addAction("&Change font");
-
-    // About
-    QMenu* helpMenu = menuBar()->addMenu("&About");
-
-    _aboutAction = helpMenu->addAction("&About");
+    _optionsAction = editMenu->addAction(tr("&Options"));
 
     // Connect actions
     connect(_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -119,14 +112,12 @@ void MainWindow::createMenu()
     connect(_openDirectoryAction, SIGNAL(triggered()), this, SLOT(openDirectory()));
     connect(_saveAction, SIGNAL(triggered()), this, SLOT(save()));
     connect(_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
-    connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
     connect(_undoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_redoAction, SIGNAL(triggered()), this, SLOT(redo()));
     connect(_copyAction, SIGNAL(triggered()), this, SLOT(copy()));
     connect(_pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
     connect(_cutAction, SIGNAL(triggered()), this, SLOT(cut()));
     connect(_selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
-    connect(_changeFontAction, SIGNAL(triggered()), this, SLOT(changeFont()));
 }
 
 void MainWindow::createToolbar()
