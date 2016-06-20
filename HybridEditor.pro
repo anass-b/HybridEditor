@@ -11,11 +11,15 @@ QT += widgets webenginewidgets webchannel
 HEADERS += MainWindow.h  \
     Editor.h \
     Document.h \
-    Languages.h
+    Languages.h \
+    OptionsDialog.h \
+    Options.h
 SOURCES += MainWindow.cpp main.cpp \
     Editor.cpp \
     Document.cpp \
-    Languages.cpp
+    Languages.cpp \
+    OptionsDialog.cpp \
+    Options.cpp
 RC_FILE = res.rc
 ICON = HybridEditor.icns
 

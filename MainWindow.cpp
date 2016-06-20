@@ -1,7 +1,29 @@
 #include "MainWindow.h"
 #include <iostream>
+#include <QStatusBar>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QFileDialog>
 
-MainWindow::MainWindow()
+MainWindow::MainWindow():
+    _newAction(nullptr),
+    _openFileAction(nullptr),
+    _openDirectoryAction(nullptr),
+    _saveAction(nullptr),
+    _saveAsAction(nullptr),
+    _quitAction(nullptr),
+    _copyAction(nullptr),
+    _pasteAction(nullptr),
+    _cutAction(nullptr),
+    _selectAllAction(nullptr),
+    _undoAction(nullptr),
+    _redoAction(nullptr),
+    _optionsAction(nullptr),
+    _tabWidget(nullptr),
+    _fileExplorerDockWidget(nullptr),
+    _fileSystemModel(nullptr),
+    _treeView(nullptr),
+    _optionsDialog(nullptr)
 {
     setWindowTitle("HybridEditor");
     createUI();
@@ -106,7 +128,7 @@ void MainWindow::createMenu()
     _optionsAction = editMenu->addAction(tr("&Options"));
 
     // Connect actions
-    connect(_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(_quitAction, SIGNAL(triggered()), this, SLOT(quit()));
     connect(_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
     connect(_openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(_openDirectoryAction, SIGNAL(triggered()), this, SLOT(openDirectory()));
@@ -118,6 +140,7 @@ void MainWindow::createMenu()
     connect(_pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
     connect(_cutAction, SIGNAL(triggered()), this, SLOT(cut()));
     connect(_selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
+    connect(_optionsAction, SIGNAL(triggered()), this, SLOT(openOptions()));
 }
 
 void MainWindow::createToolbar()
@@ -168,7 +191,7 @@ Editor* MainWindow::createTab(const QString& path)
 {
     if (path.isEmpty()) {
         // New empty tab
-        Editor* editor = new Editor;
+        Editor* editor = new Editor(_options);
         QString tabTitle = MainWindow::newTabName();
         editor->setGeneratedFilename(tabTitle);
         int index = _tabWidget->addTab(editor, tabTitle);
@@ -188,7 +211,7 @@ Editor* MainWindow::createTab(const QString& path)
             }
         }
 
-        Editor* editor = new Editor;
+        Editor* editor = new Editor(_options);
         QString tabTitle = fileInfo.fileName();
         editor->setGeneratedFilename(tabTitle);
         if (editor->loadFile(path)) {
@@ -328,18 +351,126 @@ void MainWindow::saveAs()
         statusBar()->showMessage(tr("File saved"), 2000);
 }
 
-void MainWindow::about()
+void MainWindow::openOptions()
 {
-    QMessageBox::about(this, "About", "HybridEditor v0.0.1");
+    if (_optionsDialog == nullptr) {
+        _optionsDialog = new OptionsDialog(_options, this);
+        _optionsDialog->setDelegate(this);
+#ifdef __APPLE__
+        _optionsDialog->setWindowTitle(tr("Preferences"));
+#else
+        _optionsDialog->setWindowTitle(tr("Options"));
+#endif
+    }
+    _optionsDialog->exec();
 }
 
-void MainWindow::changeFont()
+// Options Dialog Delegate
+
+void MainWindow::fontFamilySettingsChanged(const QString& fontFamily)
 {
-    bool ok = false;
-    if (activeTab()) {
-        QFont font = QFontDialog::getFont(&ok, activeTab()->font(), this, "Change font");
-        if (ok) {
-            activeTab()->setFont(font);
-        }
+    _options.setFontFamily(fontFamily);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setFontFamily(fontFamily);
+    }
+}
+
+void MainWindow::fontSizeSettingsChanged(int size)
+{
+    _options.setFontSize(size);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setFontSize(size);
+    }
+}
+
+void MainWindow::themeSettingsChanged(const QString& theme)
+{
+    _options.setTheme(theme);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setTheme(theme);
+    }
+}
+
+void MainWindow::codeFoldingSettingsChanged(const QString& codeFolding)
+{
+    _options.setCodeFolding(codeFolding);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setCodeFolding(codeFolding);
+    }
+}
+
+void MainWindow::keyBindingSettingsChanged(const QString& keyBinding)
+{
+    _options.setKeyBinding(keyBinding);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setKeyBinding(keyBinding);
+    }
+}
+
+void MainWindow::softWrapSettingsChanged(const QString& softWrap)
+{
+    _options.setSoftWrap(softWrap);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setSoftWrap(softWrap);
+    }
+}
+
+void MainWindow::showInvisiblesSettingsChanged(bool showInvisibles)
+{
+    _options.setShowInvisibles(showInvisibles);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setShowInvisibles(showInvisibles);
+    }
+}
+
+void MainWindow::showIndentRulesSettingsChanged(bool showIndentRules)
+{
+    _options.setShowIndentRules(showIndentRules);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setShowIndentRules(showIndentRules);
+    }
+}
+
+void MainWindow::showGutterSettingsChanged(bool showGutter)
+{
+    _options.setShowGutter(showGutter);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setShowGutter(showGutter);
+    }
+}
+
+void MainWindow::showPrintMarginSettingsChanged(bool showPrintMargin)
+{
+    _options.setShowPrintMargin(showPrintMargin);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setShowPrintMargin(showPrintMargin);
+    }
+}
+
+void MainWindow::useSoftTabSettingsChanged(bool useSoftTab)
+{
+    _options.setUseSoftTab(useSoftTab);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setUseSoftTab(useSoftTab);
+    }
+}
+
+void MainWindow::highlightSelectedWordSettingsChanged(bool highlightSelectedWord)
+{
+    _options.setHighlightSelectedWord(highlightSelectedWord);
+    for (int i = 0; i < _tabWidget->count(); i++) {
+        Editor* e = (Editor*)_tabWidget->widget(i);
+        e->setHighlightSelectedWord(highlightSelectedWord);
     }
 }

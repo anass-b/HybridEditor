@@ -1,9 +1,11 @@
 #include "Editor.h"
 #include "MainWindow.h"
 #include <QWebChannel>
-#include <Languages.h>
+#include <QMessageBox>
+#include <QFileDialog>
+#include "Languages.h"
 
-Editor::Editor()
+Editor::Editor(const Options& options)
 {
     QWebEnginePage* page = new QWebEnginePage(this);
     setPage(page);
@@ -13,6 +15,19 @@ Editor::Editor()
     page->setWebChannel(channel);
 
     page->load(QUrl("qrc:/ace/editor.html"));
+
+    setFontFamily(options.fontFamily());
+    setFontSize(options.fontSize());
+    setTheme(options.theme());
+    setCodeFolding(options.codeFolding());
+    setKeyBinding(options.keyBinding());
+    setSoftWrap(options.softWrap());
+    setShowInvisibles(options.showInvisibles());
+    setShowIndentRules(options.showIndentRules());
+    setShowGutter(options.showGutter());
+    setShowPrintMargin(options.showPrintMargin());
+    setHighlightSelectedWord(options.highlightSelectedWord());
+    setUseSoftTab(options.useSoftTab());
 }
 
 Languages& Editor::languages()
@@ -93,6 +108,66 @@ bool Editor::saveFile(const QString& filePath)
     _filePath = filePath;
 
     return true;
+}
+
+void Editor::setTheme(const QString& theme)
+{
+    _content.setTheme(theme);
+}
+
+void Editor::setFontFamily(const QString& fontFamily)
+{
+    _content.setFontFamily(fontFamily);
+}
+
+void Editor::setFontSize(int fontSize)
+{
+    _content.setFontSize(fontSize);
+}
+
+void Editor::setCodeFolding(const QString& codeFolding)
+{
+    _content.setCodeFolding(codeFolding);
+}
+
+void Editor::setKeyBinding(const QString& keyBinding)
+{
+    _content.setKeyBinding(keyBinding);
+}
+
+void Editor::setSoftWrap(const QString& softWrap)
+{
+    _content.setSoftWrap(softWrap);
+}
+
+void Editor::setShowInvisibles(bool showInvisibles)
+{
+    _content.setShowInvisibles(showInvisibles);
+}
+
+void Editor::setShowIndentRules(bool showIndentRules)
+{
+    _content.setShowIndentRules(showIndentRules);
+}
+
+void Editor::setShowGutter(bool showGutter)
+{
+    _content.setShowGutter(showGutter);
+}
+
+void Editor::setShowPrintMargin(bool showPrintMargin)
+{
+    _content.setShowPrintMargin(showPrintMargin);
+}
+
+void Editor::setUseSoftTab(bool useSoftTab)
+{
+    _content.setUseSoftTab(useSoftTab);
+}
+
+void Editor::setHighlightSelectedWord(bool highlightSelectedWord)
+{
+    _content.setHighlightSelectedWord(highlightSelectedWord);
 }
 
 void Editor::copy()

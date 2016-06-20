@@ -26,22 +26,91 @@
   <script>
       var editor = ace.edit("editor");
       editor.setTheme("ace/theme/twilight");
-      
-      //document.getElementById('editor').style.fontFamily='Courier';
-      //document.getElementById('editor').style.fontSize='13px';
 
-      var updateText = function(text, lang) {
+      var setText = function (text, lang) {
         editor.getSession().setMode("ace/mode/" + lang);
         editor.setValue("");
         editor.insert(text);
         editor.gotoLine(0);
       }
 
+      var setFontFamily = function (fontFamily) {
+        document.getElementById('editor').style.fontFamily = fontFamily;
+      }
+
+      var setFontSize = function (fontSize) {
+        document.getElementById('editor').style.fontSize = fontSize + 'px';
+      }
+
+      var setTheme = function (theme) {
+        editor.setTheme("ace/theme/" + theme);
+      }
+
+      var setCodeFolding = function (codeFolding) {
+        editor.session.setFoldStyle(codeFolding);
+      }
+
+      var setKeyBinding = function (keyBinding) {
+        editor.setKeyboardHandler(keyBinding);
+      }
+
+      var setSoftWrap = function (softWrap) {
+        editor.setOption("wrap", softWrap);
+      }
+
+      var setShowInvisibles = function (showInvisibles) {
+        editor.setShowInvisibles(showInvisibles);
+      }
+
+      var setShowIndentRules = function (showIndentRules) {
+        editor.setDisplayIndentGuides(showIndentRules);
+      }
+
+      var setShowGutter = function (showGutter) {
+        editor.renderer.setShowGutter(showGutter);
+      }
+
+      var setShowPrintMargin = function (showPrintMargin) {
+        editor.renderer.setShowPrintMargin(showPrintMargin);
+      }
+
+      var setHighlightSelectedWord = function (highlightSelectedWord) {
+        editor.setHighlightSelectedWord(highlightSelectedWord);
+      }
+
+      var setUseSoftTab = function (useSoftTab) {
+        editor.session.setUseSoftTabs(useSoftTab);
+      }
+
       new QWebChannel(qt.webChannelTransport,
         function(channel) {
           var content = channel.objects.content;
-          updateText(content.text, content.lang);
-          //content.textChanged.connect(updateText);
+          setText(content.text, content.lang);
+          setFontFamily(content.fontFamily);
+          setFontSize(content.fontSize);
+          setTheme(content.theme);
+          setCodeFolding(content.codeFolding);
+          setKeyBinding(content.keyBinding);
+          setSoftWrap(content.softWrap);
+          setShowInvisibles(content.showInvisibles);
+          setShowIndentRules(content.showIndentRules);
+          setShowGutter(content.showGutter);
+          setShowPrintMargin(content.showPrintMargin);
+          setUseSoftTab(content.useSoftTab);
+          setHighlightSelectedWord(content.highlightSelectedWord);
+          
+          content.fontFamilySettingsChanged.connect(setFontFamily);
+          content.fontSizeSettingsChanged.connect(setFontSize);
+          content.themeSettingsChanged.connect(setTheme);
+          content.codeFoldingSettingsChanged.connect(setCodeFolding);
+          content.keyBindingSettingsChanged.connect(setKeyBinding);
+          content.softWrapSettingsChanged.connect(setSoftWrap);
+          content.showInvisiblesSettingsChanged.connect(setShowInvisibles);
+          content.showIndentRulesSettingsChanged.connect(setShowIndentRules);
+          content.showGutterSettingsChanged.connect(setShowGutter);
+          content.showPrintMarginSettingsChanged.connect(setShowPrintMargin);
+          content.useSoftTabSettingsChanged.connect(setUseSoftTab);
+          content.highlightSelectedWordSettingsChanged.connect(setHighlightSelectedWord);
 
           editor.getSession().on('change', function() {
               content.text = editor.getValue();
