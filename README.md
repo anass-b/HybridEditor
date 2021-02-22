@@ -1,4 +1,3 @@
-# HybridEditor
-A Text Editor based on Qt and Chromium/Ace
+# HybridEditor - A Text Editor based on Qt and Ace
 
-![ScreenShot](https://raw.githubusercontent.com/anass-b/hybrideditor/master/screenshots/hybrideditor_screenshot.png)
+![](./docs/screenshot.png)
