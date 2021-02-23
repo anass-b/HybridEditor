@@ -1,3 +1,3 @@
-# HybridEditor - A Text Editor based on Qt and Ace Editor
+# HybridEditor - Qt and Ace based Text Editor
 
 ![](./docs/screenshot.png)
